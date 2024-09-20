@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Integration Example</title>
+    <style>
+        #message-list {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+        }
+        .message {
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        .sent {
+            color: green;
+        }
+        .received {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Integration Example</h1>
+    
+    <!-- Authentication -->
+    <div>
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button id="login-button">Login</button>
+    </div>
+
+    <!-- Chat Section -->
+    <div id="chat-section" style="display: none;">
+        <h2>Chat</h2>
+        <ul id="message-list"></ul>
+        <input
+            type="text"
+            id="message-input"
+            placeholder="Type a message"
+        />
+        <button id="send-button">Send Message</button>
+    </div>
+
+    <script>
+        let ws;
+        let authToken = ''; // Placeholder for your token
+
+        // Function to setup WebSocket
+        function setupWebSocket(token) {
+            if (!token) {
+                console.log('No token available, cannot connect to WebSocket');
+                return;
+            }
+
+            ws = new WebSocket(`ws://127.0.0.1:8000/ws/socket-server/?token=${token}`);
+
+            ws.onopen = () => {
+                console.log('WebSocket connection established');
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Received message:', data.message);
+                addMessage(data.message, false);
+            };
+
+            ws.onclose = (event) => {
+                console.log('WebSocket closed:', event.reason);
+                // Optionally handle reconnection logic here
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Function to send a message
+        function sendMessage(message) {
+            if (ws && message) {
+                ws.send(JSON.stringify({ message }));
+                console.log('Sent message:', message);
+                addMessage(message, true);
+                document.getElementById('message-input').value = ''; // Clear input
+            }
+        }
+
+        // Function to add a message to the UI
+        function addMessage(message, sent) {
+            const messageList = document.getElementById('message-list');
+            const messageItem = document.createElement('li');
+            messageItem.className = 'message ' + (sent ? 'sent' : 'received');
+            messageItem.textContent = message;
+            messageList.appendChild(messageItem);
+            messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to bottom
+        }
+
+        // Authentication and WebSocket setup
+        document.getElementById('login-button').addEventListener('click', async function() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/token/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to authenticate');
+                }
+
+                const data = await response.json();
+                authToken = data.access; // Store the token
+                document.getElementById('chat-section').style.display = 'block'; // Show chat section
+                setupWebSocket(authToken); // Setup WebSocket connection
+
+            } catch (error) {
+                console.error('Error during authentication:', error);
+            }
+        });
+
+        // Event listeners for sending messages
+        document.getElementById('send-button').addEventListener('click', () => {
+            const messageInput = document.getElementById('message-input');
+            sendMessage(messageInput.value);
+        });
+
+        document.getElementById('message-input').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                document.getElementById('send-button').click();
+            }
+        });
+    </script>
+</body>
+</html>
