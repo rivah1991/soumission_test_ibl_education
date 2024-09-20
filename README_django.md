@@ -19,3 +19,15 @@ This folder contains the backend application developed with Django, which expose
 
    *Once the image is created, you can run the container with the following command:*
    docker run -d -p 8000:8000 django-rest-app
+
+## Creating a Superuser
+
+To access the Django admin interface, you first need to create a superuser. Follow the steps below:
+
+1. Open the terminal where your Django project is running.
+
+2. *Run the following command:*
+   python manage.py createsuperuser
+
+3. *Open a terminal and execute the following command to create a superuser in the running container:*
+   docker exec -it <container_name_or_id> python manage.py createsuperuser

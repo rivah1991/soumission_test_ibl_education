@@ -17,8 +17,8 @@ This folder contains the configuration for Langflow, a tool that allows you to u
 2. **Start the Docker Container**  
 `docker run -p 7860:7860 langflow`
 
-- [Langflow sera accessible à l'adresse]( http://127.0.0.1:7860/).
-- [Telecharger langflow test ibl_education.json via ce lien drive:](https://drive.google.com/file/d/1NpcS7FlK803Xordb0toB46VshnNYTIwO/view?)usp=drive_link
+- [Langflow will be accessible at this address.]( http://127.0.0.1:7860/).
+- [Download langflow test ibl_education.json via this drive link:](https://drive.google.com/file/d/1NpcS7FlK803Xordb0toB46VshnNYTIwO/view?)usp=drive_link
 
 3. **Model Details**
 Model ID : `EleutherAI/gpt-neo-2.7B`
